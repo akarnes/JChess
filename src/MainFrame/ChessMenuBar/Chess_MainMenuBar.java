@@ -7,15 +7,17 @@ import MainFrame.ChessMenuBar.ChessBar_Menus.Edit_Menu;
 import MainFrame.ChessMenuBar.ChessBar_Menus.File_Menu;
 import MainFrame.ChessMenuBar.ChessBar_Menus.Help_Menu;
 import MainFrame.ChessMenuBar.ChessBar_Menus.Tools_Menu;
+import MainFrame.ChessFrame.MainPanel;
 
 public class Chess_MainMenuBar extends JMenuBar {
 
     /**
      * Creates a new instance of Chess_MainMenuBar
      */
-    public Chess_MainMenuBar(MainFrame ff) {
+    public Chess_MainMenuBar(MainFrame ff, MainPanel panel) {
         Fmenu = new File_Menu(ff);
         add(Fmenu);
+        Edit_Menu Emenu = new Edit_Menu(panel);
         add(Emenu);
         //add(Tmenu);
         add(Hmenu);
@@ -31,7 +33,7 @@ public class Chess_MainMenuBar extends JMenuBar {
     }
 
     private final File_Menu Fmenu;
-    private final Edit_Menu Emenu = new Edit_Menu();
+    private Edit_Menu Emenu;
     //private final Tools_Menu Tmenu = new Tools_Menu();
     private final Help_Menu Hmenu = new Help_Menu();
 

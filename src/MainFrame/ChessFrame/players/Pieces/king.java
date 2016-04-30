@@ -27,6 +27,22 @@ public class king {
         p.y = Y;
     }
 
+    /**
+     * Creates a new king that is a deep copy of the given king.
+     * @param clone the object to deep copy
+     */
+    public king(king clone) {
+        X = clone.X;
+        Y = clone.Y;
+        pixelX = clone.pixelX;
+        pixelY = clone.pixelY;
+        pixelPoint = new Point((int)clone.pixelPoint.getX(), (int)clone.pixelPoint.getY());
+        havelife = clone.havelife;
+        PieceIcon = new pieceIcon(clone.PieceIcon);
+        p = new Point((int)clone.p.getX(), (int)clone.p.getY());
+        old = new Point((int)clone.old.getX(), (int)clone.old.getY());
+    }
+
     public Image returnPieceImage() {
         return PieceIcon.returnPieceIcon();
     }

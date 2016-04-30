@@ -83,7 +83,7 @@ public class player1 {
     public Queen WQ;
     public Elephent WE1;
     public Elephent WE2;
-    public Solider[] WS = new Solider[8];
+    public Solider[] WS;
     public king WK;
     private int inHand = -1;
     private boolean kingischeck = false;
@@ -103,9 +103,35 @@ public class player1 {
         WQ = new Queen("src" + fileSeparator + "Icons" + fileSeparator + "Player1Icons" + fileSeparator + "wq.gif", 4, 8);
         WK = new king("src" + fileSeparator + "Icons" + fileSeparator + "Player1Icons" + fileSeparator + "wk.gif", 5, 8);
         int j = 1;
+        WS = new Solider[8];
         for (int i = 0; i <= 7; i++, j++) {
             WS[i] = new Solider("src" + fileSeparator + "Icons" + fileSeparator + "Player1Icons" + fileSeparator + "wp.gif", j, 7);
         }
+    }
+
+    /**
+     * Creates a new player1 that is a deep copy of the given clone.
+     * @param clone the object to clone
+     */
+    public player1(player1 clone) {
+        WC1 = new Castle(clone.WC1);
+        WC2 = new Castle(clone.WC2);
+        WH1 = new Horse(clone.WH1);
+        WH2 = new Horse(clone.WH2);
+        WQ = new Queen(clone.WQ);
+        WE1 = new Elephent(clone.WE1);
+        WE2 = new Elephent(clone.WE2);
+        WS = new Solider[8];
+        for (int i=0; i < WS.length; i++) {
+            WS[i] = new Solider(clone.WS[i]);
+        }
+        WK = new king(clone.WK);
+        inHand = clone.inHand;
+        kingischeck = clone.kingischeck;
+        choosenOne = clone.choosenOne;
+        Color = clone.Color;
+        other = clone.other;
+        ate_to_protect = clone.ate_to_protect;
     }
 
     public Point returnPostion(int i) {

@@ -24,6 +24,22 @@ public class Castle {
         p.y = Y;
     }
 
+    /**
+     * Creates a new castle that is a deep copy of the given castle.
+     * @param clone the castle to deep copy
+     */
+    public Castle(Castle clone) {
+        X = clone.X;
+        Y = clone.Y;
+        pixelX = clone.pixelX;
+        pixelY = clone.pixelY;
+        pixelPoint = new Point((int)clone.pixelPoint.getX(), (int)clone.pixelPoint.getY());
+        havelife = clone.havelife;
+        PieceIcon = new pieceIcon(clone.PieceIcon);
+        p = new Point((int)clone.p.getX(), (int)clone.p.getY());
+        old = new Point((int)clone.old.getX(), (int)clone.old.getY());
+    }
+
     public Image returnPieceImage() {
         return PieceIcon.returnPieceIcon();
     }

@@ -48,6 +48,30 @@ public class player2 implements Enumeration {
         }
     }
 
+    /**
+     * Creates a new player2 that is a deep copy of the given clone.
+     * @param clone the object to clone
+     */
+    public player2(player2 clone) {
+        BC1 = new Castle(clone.BC1);
+        BC2 = new Castle(clone.BC2);
+        BH1 = new Horse(clone.BH1);
+        BH2 = new Horse(clone.BH2);
+        BQ = new Queen(clone.BQ);
+        BE1 = new Elephent(clone.BE1);
+        BE2 = new Elephent(clone.BE2);
+        BS = new Solider[8];
+        for (int i=0; i < BS.length; i++) {
+            BS[i] = new Solider(clone.BS[i]);
+        }
+        BK = new king(clone.BK);
+        inHand = clone.inHand;
+        kingischeck = clone.kingischeck;
+        choosenOne = clone.choosenOne;
+        Color = clone.Color;
+        other = clone.other;
+        ate_to_protect = clone.ate_to_protect;
+    }
     public void setChoosen(int newChoosen) {
         choosenOne = newChoosen;
     }

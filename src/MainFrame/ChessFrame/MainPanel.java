@@ -15,6 +15,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.net.UnknownHostException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -29,8 +31,10 @@ import javax.net.*;
 
 public class MainPanel extends JPanel {
 
-    private player1 P1 = new player1();
-    private player2 P2 = new player2();
+    private List<player1> P1 = new ArrayList<player1>();
+    private int p1History = 2;
+    private List<player2> P2 = new ArrayList<player2>();
+    private int p2History = 2;
     private final int Divide = 600 / 8;
     private int move = 0;
     private Rectangle2D rec;
@@ -166,8 +170,14 @@ public class MainPanel extends JPanel {
     }
 
     public void start_Again() {
-        P1 = new player1();
-        P2 = new player2();
+        P1 = new ArrayList<player1>();
+        P1.add(new player1());
+        P1.add(new player1());
+        P1.add(new player1());
+        P2 = new ArrayList<player2>();
+        P2.add(new player2());
+        P2.add(new player2());
+        P2.add(new player2());
         move = 0;
         players_turn = 1;
         GameOver = false;
@@ -192,6 +202,13 @@ public class MainPanel extends JPanel {
         addMouseMotionListener(mouseDragAndDrop);
         addMouseListener(mouseHereEvent);
 
+        P1.add(new player1());
+        P1.add(new player1());
+        P1.add(new player1());
+        P2.add(new player2());
+        P2.add(new player2());
+        P2.add(new player2());
+
         myTool = myToolPanel;
         myStatus = myStatusPanel;
         setLayout(null);
@@ -199,7 +216,6 @@ public class MainPanel extends JPanel {
     }
 
     public void paintComponent(Graphics g) {
-
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
@@ -227,29 +243,29 @@ public class MainPanel extends JPanel {
         Image img;
         for (int i = 1; i <= 32; i++) {
             if (i < 17) {
-                if (i == P2.GetInhand()) {
-                    postionPoint = P2.getPixelPoint(i);
+                if (i == P2.get(p2History).GetInhand()) {
+                    postionPoint = P2.get(p2History).getPixelPoint(i);
 
                 } else {
-                    postionPoint = P2.returnPostion(i);
+                    postionPoint = P2.get(p2History).returnPostion(i);
                 }
-                img = P2.returnIconImage(i);
+                img = P2.get(p2History).returnIconImage(i);
 
             } else {
 
-                if (i == P1.GetInhand()) {
+                if (i == P1.get(p1History).GetInhand()) {
 
-                    postionPoint = P1.getPixelPoint(i);
+                    postionPoint = P1.get(p1History).getPixelPoint(i);
 
                 } else {
-                    postionPoint = P1.returnPostion(i);
+                    postionPoint = P1.get(p1History).returnPostion(i);
                 }
-                img = P1.returnIconImage(i);
+                img = P1.get(p1History).returnIconImage(i);
             }
 
-            if (i == P1.GetInhand()) {
+            if (i == P1.get(p1History).GetInhand()) {
                 g2.drawImage(img, postionPoint.x - 25, postionPoint.y - 25, Divide - 40, Divide - 12, this);
-            } else if (i == P2.GetInhand()) {
+            } else if (i == P2.get(p2History).GetInhand()) {
                 g2.drawImage(img, postionPoint.x - 25, postionPoint.y - 25, Divide - 40, Divide - 12, this);
             } else {
                 postX = rowToX(postionPoint.x);
@@ -279,30 +295,33 @@ public class MainPanel extends JPanel {
 
                 Point newP;
                 Point samePostion;
-                if (P1.GetInhand() != -1) {
+                if (P1.get(p1History).GetInhand() != -1) {
 
-                    newP = P1.getPixelPoint(P1.GetInhand());
+                    boolean end_move = true;
+                    boolean definiteFailedMove = false;
+
+                    newP = P1.get(p1History).getPixelPoint(P1.get(p1History).GetInhand());
                     newP.x /= Divide;
                     newP.y /= Divide;
                     newP.x++;
                     newP.y++;
                     int otherindex;
 
-                    Point old = P1.returnOldPostion(P1.GetInhand());
+                    Point old = P1.get(p1History).returnOldPostion(P1.get(p1History).GetInhand());
                     int x = old.x;
                     int y = old.y;
-                    Point present = P1.returnPostion(P1.GetInhand());
+                    Point present = P1.get(p1History).returnPostion(P1.get(p1History).GetInhand());
 
                     ///////////////////////////////////////////////////////////////////////////
                     ///////////////////////////////////////////////////////////////////////////
                     if (Iam_Server || local) {
 
                         // set the seen of the solider -white
-                        if (P1.GetInhand() < 33 && P1.GetInhand() > 24) {
+                        if (P1.get(p1History).GetInhand() < 33 && P1.get(p1History).GetInhand() > 24) {
                             for (int i = 1; i < 17; i++) {
-                                samePostion = P2.returnPostion(i);
+                                samePostion = P2.get(p2History).returnPostion(i);
                                 if (samePostion.x == newP.x && samePostion.y == newP.y) {
-                                    if (P1.setSeentoSiliders(P1.GetInhand(), samePostion)) {
+                                    if (P1.get(p1History).setSeentoSiliders(P1.get(p1History).GetInhand(), samePostion)) {
                                         break;
                                     }
                                 }
@@ -310,21 +329,22 @@ public class MainPanel extends JPanel {
                         }
 ///////////////////////////////////////////////////////////////////////////////////
                         if (!(newP.x == present.x && newP.y == present.y)/*&&!P1.returncheckKing()*/) {
-                            if (P1.checkthemove(newP, P1.GetInhand())) // if the move is illegal
+                            if (P1.get(p1History).checkthemove(newP, P1.get(p1History).GetInhand())) // if the move is illegal
                             {
 
                                 boolean flag = false;
 
                                 for (int i = 1; i <= 32; i++) {
-                                    if (P1.GetInhand() != i)// check if there is peices in the WAY
+                                    if (P1.get(p1History).GetInhand() != i)// check if there is peices in the WAY
                                     {
                                         if (i < 17) {
-                                            flag = P1.checktheWay(newP, P2.returnPostion(i), P1.GetInhand());//Means there is somting in the Way so can't move
+                                            flag = P1.get(p1History).checktheWay(newP, P2.get(p2History).returnPostion(i), P1.get(p1History).GetInhand());//Means there is somting in the Way so can't move
                                         } else {
-                                            flag = P1.checktheWay(newP, P1.returnPostion(i), P1.GetInhand());
+                                            flag = P1.get(p1History).checktheWay(newP, P1.get(p1History).returnPostion(i), P1.get(p1History).GetInhand());
                                         }
 
                                         if (flag == true) {
+                                            end_move = false;
                                             break;//Means  there is a Pice in the Way
                                         }
                                     }
@@ -332,46 +352,45 @@ public class MainPanel extends JPanel {
                                     //
                                 }
 
-                                if (!flag && P1.Pice_already_there(newP)) //(if flag =false this means "The pice able to MOVE as logic""
+                                if (!flag && P1.get(p1History).Pice_already_there(newP)) //(if flag =false this means "The pice able to MOVE as logic""
                                 {
                                     // So We Check If the New Place Make  a Check To Black King !!!
                                     boolean kin2 = true;
                                     Point myold = new Point();
-                                    Point o = P1.returnPostion(P1.GetInhand());
+                                    Point o = P1.get(p1History).returnPostion(P1.get(p1History).GetInhand());
                                     myold.x = o.x;
                                     myold.y = o.y;
                                     Point other = new Point();
                                     Point f = new Point();
                                     boolean kill = false;
                                     int killed = -1;
-                                    boolean end_move = true;
 
                                     ////***  Start Here to Check the King
                                     for (int k = 1; k < 17; k++) {
                                         // I have to Check the Place
 
-                                        other = P2.returnPostion(k);
+                                        other = P2.get(p2History).returnPostion(k);
 
                                         if (newP.x == other.x && newP.y == other.y) {
 
-                                            int inHand = P1.GetInhand();
+                                            int inHand = P1.get(p1History).GetInhand();
 
-                                            if (inHand > 24 && P1.returnsoliderSeen(inHand)) {
+                                            if (inHand > 24 && P1.get(p1History).returnsoliderSeen(inHand)) {
                                                 kill = true;
 
                                                 f.x = other.x;
                                                 f.y = other.y;
 
-                                                P2.Killedpiec(k);
+                                                P2.get(p2History).Killedpiec(k);
                                             } else if (inHand <= 24) {
                                                 kill = true;
 
                                                 f.x = other.x;
                                                 f.y = other.y;
 
-                                                P2.Killedpiec(k);
+                                                P2.get(p2History).Killedpiec(k);
                                             } else {
-                                                P1.changePostion(myold, inHand);
+                                                P1.get(p1History).changePostion(myold, inHand);
                                                 end_move = false;
 
                                                 break;
@@ -386,35 +405,35 @@ public class MainPanel extends JPanel {
                                     }
 
                                     if (end_move) {
-                                        P1.changePostion(newP, P1.GetInhand());// Here is the mOve ended
+                                        P1.get(p1History).changePostion(newP, P1.get(p1History).GetInhand());// Here is the mOve ended
                                     }
-                                    P1.checkKing(false);
-                                    if (P1.see_king_Check(P2)) // if my king will be in check if i move
+                                    P1.get(p1History).checkKing(false);
+                                    if (P1.get(p1History).see_king_Check(P2.get(p2History))) // if my king will be in check if i move
                                     //so i can't move and i will return back to old postion'
                                     {
-                                        P1.changePostion(myold, P1.GetInhand());
-                                        P1.checkKing(true);
+                                        P1.get(p1History).changePostion(myold, P1.get(p1History).GetInhand());
+                                        P1.get(p1History).checkKing(true);
                                         end_move = false;
                                     }
-                                    if (kill && P1.returncheckKing()) {
-                                        P2.changePostion(f, killed);
+                                    if (kill && P1.get(p1History).returncheckKing()) {
+                                        P2.get(p2History).changePostion(f, killed);
 
                                     }
 
-                                    if (!P1.returncheckKing()) {
+                                    if (!P1.get(p1History).returncheckKing()) {
 
-                                        if (P2.see_king_Check(P1)) // if my king will be in check if i move
+                                        if (P2.get(p2History).see_king_Check(P1.get(p1History))) // if my king will be in check if i move
                                         //so i can't move and i will return back to old postion'
                                         {
 
-                                            P2.checkKing(true);
+                                            P2.get(p2History).checkKing(true);
                                             end_move = false;
-                                            if (P2.Check_Mate_GameOver(P1)) {
+                                            if (P2.get(p2History).Check_Mate_GameOver(P1.get(p1History))) {
                                                 GameOver();
-                                                Box = Integer.toString(P2.GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
+                                                Box = Integer.toString(P2.get(p2History).GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
                                                 can_Send = true;
                                             } else {
-                                                Box = Integer.toString(P1.GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
+                                                Box = Integer.toString(P1.get(p1History).GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
 
                                                 CheckStatus();
                                                 can_Send = true;
@@ -424,30 +443,46 @@ public class MainPanel extends JPanel {
                                         }
 
                                         if (end_move) {
-                                            Box = Integer.toString(P1.GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
+                                            // This is a valid move
+                                            Box = Integer.toString(P1.get(p1History).GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
 
-                                            ChangeTurn();
+                                            ChangeTurn(false);
                                             can_Send = true;
+
                                         }
 
                                     }
 
                                 }
 
+                            } else {
+                                definiteFailedMove = true;
                             }
                         }
 
-                        P1.SetInhand(-1);
+                        P1.get(p1History).SetInhand(-1);
 
-                        repaint();
-
-                        if (can_Send && ((Iam_Server || Iam_Client))) {
-
+                        if (can_Send && ((Iam_Server || Iam_Client))) { 
                             Send_move();
                             //Send_to.resume();
 
                             //          Recv_from.resume();
                         }
+
+                        if (can_Send) { //end_move && !definiteFailedMove) {
+                            // Save this move in the undo history
+                            p1History++;
+                            if (p1History >= P1.size()) {
+                                P1.add(new player1());
+                            }
+                            P1.set(p1History, new player1(P1.get(p1History-1)));
+                            // Remove any redo history after this, since it's
+                            // invalid now
+                            P1 = P1.subList(0, p1History+1);
+                            P2 = P2.subList(0, p2History+1);
+                        }
+
+                        repaint();
 
                         if (GameOver) {
                             JOptionPane.showConfirmDialog(null, "Check Mate\n White won the game", "Game Over", JOptionPane.PLAIN_MESSAGE);
@@ -458,29 +493,32 @@ public class MainPanel extends JPanel {
                 //////////////////////////////Black///////////////////////////////////////////
                 //////////////////////////////Black//////////////////////////////////////////////
                 //////////////////////////////Black//////////////////////////////////////////////
-                else if (P2.GetInhand() != -1)//white
+                else if (P2.get(p2History).GetInhand() != -1)//white
                 {
 
+                    boolean end_move = true;
+                    boolean definiteFailedMove = false;
+
                     if (Iam_Client || local) {
-                        newP = P2.getPixelPoint(P2.GetInhand());
+                        newP = P2.get(p2History).getPixelPoint(P2.get(p2History).GetInhand());
                         newP.x /= Divide;
                         newP.y /= Divide;
                         newP.x++;
                         newP.y++;
                         boolean Kingch = false;
-                        Point old = P2.returnOldPostion(P2.GetInhand());
-                        Point present = P2.returnPostion(P2.GetInhand());
+                        Point old = P2.get(p2History).returnOldPostion(P2.get(p2History).GetInhand());
+                        Point present = P2.get(p2History).returnPostion(P2.get(p2History).GetInhand());
 
                         // set the seen of the solider -black
                         // set the seen of the solider -black
                         // set the seen of the solider -black
-                        if (P2.GetInhand() < 17 && P2.GetInhand() > 8) {
+                        if (P2.get(p2History).GetInhand() < 17 && P2.get(p2History).GetInhand() > 8) {
                             for (int i = 17; i < 33; i++) {
-                                samePostion = P1.returnPostion(i);
+                                samePostion = P1.get(p1History).returnPostion(i);
 
                                 if (samePostion.x == newP.x && samePostion.y == newP.y) {
-                                    if (P2.setSeentoSiliders(P2.GetInhand(), samePostion)) {
-
+                                    if (P2.get(p2History).setSeentoSiliders(P2.get(p2History).GetInhand(), samePostion)) {
+                                        //end_move = false;
                                         break;
                                     }
                                 }
@@ -488,26 +526,27 @@ public class MainPanel extends JPanel {
                         }
 
                         if (!(newP.x == present.x && newP.y == present.y)/*&&!P2.returncheckKing()*/) {
-                            if (P2.checkthemove(newP, P2.GetInhand())) {
+                            if (P2.get(p2History).checkthemove(newP, P2.get(p2History).GetInhand())) {
                                 boolean flag = false;
                                 for (int i = 1; i <= 32; i++) {
-                                    if (P2.GetInhand() != i) {
+                                    if (P2.get(p2History).GetInhand() != i) {
                                         if (i < 17) {
-                                            flag = P2.checktheWay(newP, P2.returnPostion(i), P2.GetInhand());
+                                            flag = P2.get(p2History).checktheWay(newP, P2.get(p2History).returnPostion(i), P2.get(p2History).GetInhand());
                                         } else {
-                                            flag = P2.checktheWay(newP, P1.returnPostion(i), P2.GetInhand());
+                                            flag = P2.get(p2History).checktheWay(newP, P1.get(p1History).returnPostion(i), P2.get(p2History).GetInhand());
                                         }
 
                                         if (flag) {
+                                            end_move = false;
                                             break;
                                         }
                                     }
                                 }
 
                                 for (int i = 1; i <= 16 && !flag; i++) {
-                                    if (P2.GetInhand() != i) {
+                                    if (P2.get(p2History).GetInhand() != i) {
                                         if (flag == false) {
-                                            samePostion = P2.returnPostion(i);
+                                            samePostion = P2.get(p2History).returnPostion(i);
                                             if (newP.x == samePostion.x && newP.y == samePostion.y) {
                                                 flag = true;
                                                 break;
@@ -518,48 +557,48 @@ public class MainPanel extends JPanel {
                                     }
 
                                     if (flag) {
+                                        end_move = false;
                                         break;
                                     }
                                 }
 
                                 if (!flag) {
-                                    Point kingPostion2 = P2.returnPostion(8);
+                                    Point kingPostion2 = P2.get(p2History).returnPostion(8);
                                     Point myold = new Point();
-                                    Point o = P2.returnPostion(P2.GetInhand());
+                                    Point o = P2.get(p2History).returnPostion(P2.get(p2History).GetInhand());
                                     myold.x = o.x;
                                     myold.y = o.y;
                                     Point other = new Point();
                                     Point f = new Point();
                                     boolean kill = false;
-                                    boolean end_move = true;
                                     int killed = -1;
 
                                     for (int k = 17; k < 33; k++) {
-                                        other = P1.returnPostion(k);
+                                        other = P1.get(p1History).returnPostion(k);
                                         if (newP.x == other.x && newP.y == other.y) {
 
-                                            int inHand = P2.GetInhand();
+                                            int inHand = P2.get(p2History).GetInhand();
 
-                                            if (inHand > 8 && P2.returnsoliderSeen(inHand)) {
+                                            if (inHand > 8 && P2.get(p2History).returnsoliderSeen(inHand)) {
                                                 kill = true;
 
-                                                other = P1.returnPostion(k);
+                                                other = P1.get(p1History).returnPostion(k);
 
                                                 f.x = other.x;
                                                 f.y = other.y;
 
-                                                P1.Killedpiec(k);
+                                                P1.get(p1History).Killedpiec(k);
                                             } else if (inHand <= 8) {
                                                 kill = true;
 
-                                                other = P1.returnPostion(k);
+                                                other = P1.get(p1History).returnPostion(k);
 
                                                 f.x = other.x;
                                                 f.y = other.y;
-                                                P1.Killedpiec(k);
+                                                P1.get(p1History).Killedpiec(k);
                                             } else {
                                                 end_move = false;
-                                                P2.changePostion(myold, inHand);
+                                                P2.get(p2History).changePostion(myold, inHand);
                                             }
 
                                             killed = k;
@@ -570,62 +609,63 @@ public class MainPanel extends JPanel {
                                     }
                                     //boolean kin2=true;
                                     if (end_move) {
-                                        P2.changePostion(newP, P2.GetInhand());
+                                        P2.get(p2History).changePostion(newP, P2.get(p2History).GetInhand());
                                     }
 
-                                    P2.checkKing(false);
-                                    if (P2.see_king_Check(P1)) // if my king will be in check if i move
+                                    P2.get(p2History).checkKing(false);
+                                    if (P2.get(p2History).see_king_Check(P1.get(p1History))) // if my king will be in check if i move
                                     //so i can't move and i will return back to old postion'
                                     {
-                                        P2.changePostion(myold, P2.GetInhand());
-                                        P2.checkKing(true);
+                                        P2.get(p2History).changePostion(myold, P2.get(p2History).GetInhand());
+                                        P2.get(p2History).checkKing(true);
 
                                         end_move = false;
 
                                     }
-                                    if (kill && P2.returncheckKing()) {
+                                    if (kill && P2.get(p2History).returncheckKing()) {
 
-                                        P1.changePostion(f, killed);
+                                        P1.get(p1History).changePostion(f, killed);
                                     }
 
-                                    if (P2.returncheckKing()) {
-                                        P2.changePostion(myold, P2.GetInhand());
+                                    if (P2.get(p2History).returncheckKing()) {
+                                        P2.get(p2History).changePostion(myold, P2.get(p2History).GetInhand());
                                     }
 
-                                    if (!P2.returncheckKing()) {
-                                        if (P1.see_king_Check(P2)) // if my king will be in check if i move
+                                    if (!P2.get(p2History).returncheckKing()) {
+                                        if (P1.get(p1History).see_king_Check(P2.get(p2History))) // if my king will be in check if i move
                                         //so i can't move and i will return back to old postion'
                                         {
 
-                                            P1.checkKing(true);
+                                            P1.get(p1History).checkKing(true);
                                             end_move = false;
 
-                                            if (P1.Check_Mate_GameOver(P2)) {
-                                                Box = Integer.toString(P2.GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
+                                            if (P1.get(p1History).Check_Mate_GameOver(P2.get(p2History))) {
+                                                Box = Integer.toString(P2.get(p2History).GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
                                                 GameOver();
 
                                                 can_Send = true;
                                             } else {
-                                                Box = Integer.toString(P2.GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
+                                                Box = Integer.toString(P2.get(p2History).GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
                                                 CheckStatus();
                                                 can_Send = true;
                                             }
                                         }
 
                                         if (end_move) {
-                                            Box = Integer.toString(P2.GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
-                                            ChangeTurn();
+                                            // The move was legitimate
+                                            Box = Integer.toString(P2.get(p2History).GetInhand()) + Integer.toString(newP.x) + Integer.toString(newP.y);
+                                            ChangeTurn(false);
                                             can_Send = true;
                                         }
 
                                     }
 
                                 }
+                            } else {
+                                definiteFailedMove = true;
                             }
                         }
-                        P2.SetInhand(-1);
-
-                        repaint();
+                        P2.get(p2History).SetInhand(-1);
 
                         if (can_Send && ((Iam_Server || Iam_Client))) {
 
@@ -634,6 +674,22 @@ public class MainPanel extends JPanel {
                             ///     Recv_from.resume();
 
                         }
+
+                        if (can_Send) {//end_move && !definiteFailedMove) {
+                            // Save this move in the undo history
+                            p2History++;
+                            if (p2History >= P2.size()) {
+                                P2.add(new player2());
+                            }
+                            P2.set(p2History, new player2(P2.get(p2History-1)));
+                            // Remove any redo history after this, since it's
+                            // invalid now
+                            P2 = P2.subList(0, p2History+1);
+                            P1 = P1.subList(0, p1History+1);
+                        }
+
+                        repaint();
+
                         if (GameOver) {
                             JOptionPane.showConfirmDialog(null, "Check Mate\n Black won the game", "Game Over", JOptionPane.DEFAULT_OPTION);
                         }
@@ -669,36 +725,36 @@ public class MainPanel extends JPanel {
 
                 }
 
-                if (players_turn == 1 && P1.GetInhand() == -1)//Player 1
+                if (players_turn == 1 && P1.get(p1History).GetInhand() == -1)//Player 1
                 {
                     for (int i = 17; i <= 32; i++) {
-                        Point p = P1.returnPostion(i);
+                        Point p = P1.get(p1History).returnPostion(i);
                         if (p.x == newX && p.y == newY) {
-                            P1.SetInhand(i);
+                            P1.get(p1History).SetInhand(i);
                             whenHandleAndPice(x, y);
                             return true;
                         }
                     }
-                } else if (players_turn == 2 && P2.GetInhand() == -1)//Player 2
+                } else if (players_turn == 2 && P2.get(p2History).GetInhand() == -1)//Player 2
                 {
                     for (int i = 1; i <= 16; i++) {
-                        Point p = P2.returnPostion(i);
+                        Point p = P2.get(p2History).returnPostion(i);
                         if (p.x == newX && p.y == newY) {
-                            P2.SetInhand(i);
+                            P2.get(p2History).SetInhand(i);
                             whenHandleAndPice(x, y);
                             return true;
                         }
                     }
-                } else if (players_turn == 1 && P1.GetInhand() != -1)//Player 1
+                } else if (players_turn == 1 && P1.get(p1History).GetInhand() != -1)//Player 1
                 {
                     whenHandleAndPice(x, y);
                     return true;
-                } else if (players_turn == 2 && P2.GetInhand() != -1)//Player 2
+                } else if (players_turn == 2 && P2.get(p2History).GetInhand() != -1)//Player 2
                 {
                     whenHandleAndPice(x, y);
                     return true;
                 }
-                P1.SetInhand(-1);
+                P1.get(p1History).SetInhand(-1);
                 move = 0;
 
                 return false;
@@ -710,11 +766,11 @@ public class MainPanel extends JPanel {
 
     public boolean whenHandleAndPice(int x, int y) {
 
-        if (players_turn == 1 && P1.GetInhand() != -1) {
-            P1.changePixel(x, y, P1.GetInhand());
+        if (players_turn == 1 && P1.get(p1History).GetInhand() != -1) {
+            P1.get(p1History).changePixel(x, y, P1.get(p1History).GetInhand());
             return true;
-        } else if (players_turn == 2 && P2.GetInhand() != -1) {
-            P2.changePixel(x, y, P2.GetInhand());
+        } else if (players_turn == 2 && P2.get(p2History).GetInhand() != -1) {
+            P2.get(p2History).changePixel(x, y, P2.get(p2History).GetInhand());
             return true;
         }
         return false;
@@ -770,16 +826,20 @@ public class MainPanel extends JPanel {
         // return false;
     }
 
-    private void ChangeTurn() {
+    private void ChangeTurn(boolean undoRedo) {
         if (players_turn == 1) {
             players_turn = 2;
-            myTool.add_to_History("White : " + P1.Tell_me_About_last_move());
+            if (!undoRedo) {
+                myTool.add_to_History("White : " + P1.get(p1History).Tell_me_About_last_move());
+            }
             myStatus.changeStatus(" Black player turn");
             myTool.change_to_Timer2();
             myTool.setturn(1);
         } else if (players_turn == 2) {
             players_turn = 1;
-            myTool.add_to_History("Black : " + P2.Tell_me_About_last_move());
+            if (!undoRedo) {
+                myTool.add_to_History("Black : " + P2.get(p2History).Tell_me_About_last_move());
+            }
             myTool.change_to_Timer1();
             myStatus.changeStatus(" White player turn");
             myTool.setturn(0);
@@ -790,13 +850,13 @@ public class MainPanel extends JPanel {
     private void NetChangeTurn() {
         if (players_turn == 2) {
 
-            myTool.add_to_History("White : " + P1.Tell_me_About_last_move());
+            myTool.add_to_History("White : " + P1.get(p1History).Tell_me_About_last_move());
             myStatus.changeStatus(" Black player turn");
             myTool.change_to_Timer2();
             myTool.setturn(1);
         } else if (players_turn == 1) {
 
-            myTool.add_to_History("Black : " + P2.Tell_me_About_last_move());
+            myTool.add_to_History("Black : " + P2.get(p2History).Tell_me_About_last_move());
             myTool.change_to_Timer1();
             myStatus.changeStatus(" White player turn");
             myTool.setturn(0);
@@ -807,12 +867,12 @@ public class MainPanel extends JPanel {
     private void NeTGameCheckStatus() {
         if (players_turn == 1) {
 
-            myTool.add_to_History("White : " + P1.Tell_me_About_last_move());
+            myTool.add_to_History("White : " + P1.get(p1History).Tell_me_About_last_move());
             myTool.change_to_Timer2();
             myTool.setturncheck(1);
         } else if (players_turn == 2) {
 
-            myTool.add_to_History("Black : " + P2.Tell_me_About_last_move());
+            myTool.add_to_History("Black : " + P2.get(p2History).Tell_me_About_last_move());
             myTool.change_to_Timer1();
             myTool.setturncheck(0);
         }
@@ -823,13 +883,13 @@ public class MainPanel extends JPanel {
         if (players_turn == 1) {
 
             players_turn = 2;
-            myTool.add_to_History("White : " + P1.Tell_me_About_last_move());
+            myTool.add_to_History("White : " + P1.get(p1History).Tell_me_About_last_move());
             myTool.change_to_Timer2();
             myTool.setturncheck(1);
         } else if (players_turn == 2) {
 
             players_turn = 1;
-            myTool.add_to_History("Black : " + P2.Tell_me_About_last_move());
+            myTool.add_to_History("Black : " + P2.get(p2History).Tell_me_About_last_move());
             myTool.change_to_Timer1();
             myTool.setturncheck(0);
         }
@@ -863,7 +923,6 @@ public class MainPanel extends JPanel {
 
                 } catch (IOException ex) {
                     ex.printStackTrace();
-                    System.out.println("ERROR");
                 }
 
                 if (Box != null) {
@@ -886,22 +945,21 @@ public class MainPanel extends JPanel {
 
                     if (players_turn == 1) {
 
-                        P1.SetInhand(newInHand);
+                        P1.get(p1History).SetInhand(newInHand);
                         players_turn = 2;
 
-                        P1.changePostion(new Point(newX, newY), newInHand);
+                        P1.get(p1History).changePostion(new Point(newX, newY), newInHand);
 
-                        P2.Killedpiec(P1.Get_Pice_already_there_from_enemy(new Point(newX, newY), P2));
-                        P2.checkKing(false);
+                        P2.get(p2History).Killedpiec(P1.get(p1History).Get_Pice_already_there_from_enemy(new Point(newX, newY), P2.get(p2History)));
+                        P2.get(p2History).checkKing(false);
 
-                        if (P2.see_king_Check(P1)) // if my king will be in check if i move
+                        if (P2.get(p2History).see_king_Check(P1.get(p1History))) // if my king will be in check if i move
                         //so i can't move and i will return back to old postion'
                         {
 
-                            P2.checkKing(true);
+                            P2.get(p2History).checkKing(true);
 
-                            if (P2.Check_Mate_GameOver(P1)) {
-                                System.out.println("mate");
+                            if (P2.get(p2History).Check_Mate_GameOver(P1.get(p1History))) {
                                 GameOver();
 
                             } else {
@@ -913,25 +971,24 @@ public class MainPanel extends JPanel {
                             NetChangeTurn();
                         }
 
-                        P1.SetInhand(-1);
+                        P1.get(p1History).SetInhand(-1);
 
                     } else {
-                        P2.SetInhand(newInHand);
-                        P2.changePostion(new Point(newX, newY), newInHand);
+                        P2.get(p2History).SetInhand(newInHand);
+                        P2.get(p2History).changePostion(new Point(newX, newY), newInHand);
 
-                        P1.Killedpiec(P2.Get_Pice_already_there_from_enemy(new Point(newX, newY), P1));
+                        P1.get(p1History).Killedpiec(P2.get(p2History).Get_Pice_already_there_from_enemy(new Point(newX, newY), P1.get(p1History)));
                         players_turn = 1;
 
-                        P1.checkKing(false);
-                        if (P1.see_king_Check(P2)) // if my king will be in check if i move
+                        P1.get(p1History).checkKing(false);
+                        if (P1.get(p1History).see_king_Check(P2.get(p2History))) // if my king will be in check if i move
                         //so i can't move and i will return back to old postion'
                         {
 
-                            P1.checkKing(true);
+                            P1.get(p1History).checkKing(true);
 
-                            if (P1.Check_Mate_GameOver(P2)) {
+                            if (P1.get(p1History).Check_Mate_GameOver(P2.get(p2History))) {
 
-                                System.out.println("mate");
                                 GameOver();
 
                             } else {
@@ -943,7 +1000,7 @@ public class MainPanel extends JPanel {
                             NetChangeTurn();
                         }
 
-                        P2.SetInhand(-1);
+                        P2.get(p2History).SetInhand(-1);
                     }
                     //   CheckStatus();
 
@@ -952,6 +1009,60 @@ public class MainPanel extends JPanel {
 
             }
         }
+    }
+
+    /**
+     * Undoes the last move.
+     * @return true if the move was undone, false if there's no undo history
+     */
+    public String undoMove() {
+        if (GameOver) {
+            return "The game is over, your chance to undo has passed!";
+        }
+        if (MyIp_Address != null) {
+            return "You can't undo a move in online mode!";
+        }
+
+        if (players_turn == 2) {
+            if (p1History <= 1) {
+                return "There is nothing to undo!";
+            }
+            p1History-=2;
+        } else if (players_turn == 1) {
+            if (p2History <= 1) {
+                return "There is nothing to undo!";
+            }
+            p2History-=2;
+        }
+        ChangeTurn(true);
+        repaint();
+        
+        return "";
+    }
+
+    public String redoMove() {
+        if (GameOver) {
+            return "The game is over, your chance to redo has passed!";
+        }
+        if (MyIp_Address != null) {
+            return "You can't redo a move in online mode!";
+        }
+
+        if (players_turn == 1) {
+            if (P1.size() <= p1History+2) {
+                return "There is nothing to redo!";
+            }
+            p1History+=2;
+        } else if (players_turn == 2) {
+            if (P2.size() <= p2History+2) {
+                return "There is nothing to redo!";
+            }
+            p2History+=2;
+        }
+        ChangeTurn(true);
+        repaint();
+
+        return "";
     }
 
 }

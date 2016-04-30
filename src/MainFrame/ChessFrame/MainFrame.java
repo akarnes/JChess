@@ -28,7 +28,7 @@ public class MainFrame extends JFrame {
         contentPane.add(Satuspanel);
         contentPane.add(Toolpanel);
 
-        MyChessBar = new Chess_MainMenuBar(this);
+        MyChessBar = new Chess_MainMenuBar(this, Mainpanel);
 
         setJMenuBar(MyChessBar);
         setVisible(true);
